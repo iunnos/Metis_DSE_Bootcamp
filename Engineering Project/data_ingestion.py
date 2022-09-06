@@ -1,4 +1,4 @@
-from riotwatcher import LolWatcher, ApiError
+from riotwatcher import LolWatcher, ApiError #https://riot-watcher.readthedocs.io/en/latest/riotwatcher/LeagueOfLegends/index.html
 import pandas as pd
 from operator import itemgetter
 from sqlalchemy import create_engine
