@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 import pickle
 
 #global variables
-api_key='RGAPI-a7f45e20-6995-48a0-99c7-f5b2e3d0e2b7'
+api_key=''
 watcher = LolWatcher(api_key)
 rank = ['Iron','Bronze','Silver','Gold','Platinum','Diamond','Master','Grandmaster','Challenger']
 region = ['North America','Korea','Europe West','Europe Nordic & East','Oceania','Japan','Brazil','Latin America S','Latin America N','Russia','Turkiye']
@@ -17,10 +17,6 @@ regional_server = {'north america':'NA1','korea':'KR','europe west':'EUW1','euro
             'brazil':'BR1','latin america s':'LA2','latin america n':'LA1','russia':'RU','turkiye':'TR1'}
 latest = watcher.data_dragon.versions_all()[0]
 engine = create_engine('sqlite:///League of Legends.db')
-#conn=sqlite3.connect('League of Legends.db')
-#c = conn.cursor()
-#c.execute('CREATE TABLE IF NOT EXISTS jp_players (leagueId,queueType,tier,rank,summonerId,summonerName,leaguePoints,wins,losses,veteran,inactive,freshBlood,hotStreak,miniSeries)')
-#conn.commit()
 
 #gets player info in rank
 def league_crawl(region):
@@ -66,38 +62,37 @@ def league_crawl(region):
     return data
 
 #player info dataframes
-#na_df = pd.DataFrame(league_crawl('north america'))
-#kr_df = pd.DataFrame(league_crawl('korea'))
-#euw_df = pd.DataFrame(league_crawl('europe west'))
-#eun_df = pd.DataFrame(league_crawl('europe nordic & eas'))
-#oc_df = pd.DataFrame(league_crawl('oceania'))
-#jp_df = pd.DataFrame(league_crawl('japan'))
-#br_df = pd.DataFrame(league_crawl('brazil'))
-#las_df = pd.DataFrame(league_crawl('latin america s'))
-#lan_df = pd.DataFrame(league_crawl('latin america n'))
-#ru_df = pd.DataFrame(league_crawl('russia'))
-#tr_df = pd.DataFrame(league_crawl('turkiye'))
+na_df = pd.DataFrame(league_crawl('north america'))
+kr_df = pd.DataFrame(league_crawl('korea'))
+euw_df = pd.DataFrame(league_crawl('europe west'))
+eun_df = pd.DataFrame(league_crawl('europe nordic & eas'))
+oc_df = pd.DataFrame(league_crawl('oceania'))
+jp_df = pd.DataFrame(league_crawl('japan'))
+br_df = pd.DataFrame(league_crawl('brazil'))
+las_df = pd.DataFrame(league_crawl('latin america s'))
+lan_df = pd.DataFrame(league_crawl('latin america n'))
+ru_df = pd.DataFrame(league_crawl('russia'))
+tr_df = pd.DataFrame(league_crawl('turkiye'))
 
-#jp_df.to_csv('Japanese Players.csv',index=False)
-jp_df=pd.read_csv('Japanese Players.csv')
-#na_df.to_sql('na_players',conn)
-#kr_df.to_sql('kr_players',conn)
-#euw_df.to_sql('euw_players',conn)
-#eun_df.to_sql('eun_players',conn)
-#oc_df.to_sql('oc_players',conn)
+
+na_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('na_players',engine,if_exists='replace',index=False)
+kr_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('kr_players',engine,if_exists='replace',index=False)
+euw_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('euw_players',engine,if_exists='replace',index=False)
+eun_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('eun_players',engine,if_exists='replace',index=False)
+oc_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('oc_players',engine,if_exists='replace',index=False)
 jp_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('jp_players',engine,if_exists='replace',index=False)
-#br_df.to_sql('br_players',conn)
-#las_df.to_sql('las_players',conn)
-#lan_df.to_sql('lan_players',conn)
-#ru_df.to_sql('ru_players',conn)
-#tr_df.to_sql('tr_players',conn)
+br_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('br_players',engine,if_exists='replace',index=False)
+las_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('las_players',engine,if_exists='replace',index=False)
+lan_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('lan_players',engine,if_exists='replace',index=False)
+ru_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('ru_players',engine,if_exists='replace',index=False)
+tr_df[['leagueId','queueType','tier','rank','summonerId','summonerName','leaguePoints','wins','losses']].to_sql('tr_players',engine,if_exists='replace',index=False)
 
 jp_df = pd.DataFrame(pd.read_sql_query('''SELECT * FROM jp_players''',engine))
 
 #match information
 def match_crawl(regions):
-    df_to_use = {'Japan':jp_df[12000:127052:200],#'North America':na_df,'Brazil':br_df,'Latin America S':las_df,'Latin America N':lan_df,
-                #'Korea':kr_df,#'Europe West':euw_df,'Europe Nordic & East':eun_df,'Russia':ru_df,'Turkiye':tr_df,#'Oceania':oc_df
+    df_to_use = {'Japan':jp_df,'North America':na_df,'Brazil':br_df,'Latin America S':las_df,'Latin America N':lan_df,
+                'Korea':kr_df,'Europe West':euw_df,'Europe Nordic & East':eun_df,'Russia':ru_df,'Turkiye':tr_df,'Oceania':oc_df
                 }
     data = []
     for index,row in df_to_use[regions].iterrows():
@@ -115,9 +110,8 @@ def match_crawl(regions):
     match_df = pd.DataFrame(data,columns=['matchId','puuid','tier','champion'])
     return match_df
 
-#jp_match_df = pd.DataFrame(match_crawl('Japan'))
-#jp_match_df.to_sql('jp_matches',engine, if_exists='replace',index=False)
-jp_match_df = pd.DataFrame(pd.read_sql_query('''SELECT * FROM jp_matches''',engine))
+#gathering data
+jp_match_df = pd.DataFrame(match_crawl('Japan'))
 jp_match_df.drop_duplicates(inplace=True)
 jp_match_df.to_csv('Japanese Matches.csv', index=False)
 pickle.dump(jp_match_df,open('match.pkl','wb'))
